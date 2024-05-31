@@ -20,6 +20,8 @@ gh clone-org [-t TOPIC] [-s QUERY] [-p PATH] [-y] ORG
     Clone path. Default: current directory.
   -t, --topic TOPIC
     Clone repositories with this topic
+  -S, --shallow
+    Clone repositories with --depth 1
   -s --search QUERY
     Clone repositories found by this search string. If this is provided '-t' will be ignored.
     Example: -s "is:public language:go"

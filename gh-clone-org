@@ -13,6 +13,8 @@ usage()
   echo "    Clone path. Default: current directory."
   echo "  -t, --topic TOPIC"
   echo "    Clone repositories with this topic"
+  echo "  -S, --shallow"
+  echo "    Clone repositories with --depth 1"
   echo "  -s --search QUERY"
   echo "    Clone repositories found by this search string. If this is provided '-t' will be ignored."
   echo "    Example: -s \"is:public language:go\""
@@ -42,6 +44,9 @@ urlencode() {
   LC_COLLATE=$old_lc_collate
 }
 
+GIT_PULL_ARGS=()
+GIT_CLONE_ARGS=()
+
 while [ "$1" != "" ]
 do
   case $1 in
@@ -55,6 +60,8 @@ do
       ;;
     -p | --path ) shift
       CLONE_PATH="$1"
+      ;;
+    -S | --shallow ) GIT_CLONE_ARGS+=("--depth=1") GIT_PULL_ARGS+=("--depth=1")
       ;;
     -s | --search ) shift
       SEARCH="$1"
@@ -153,9 +160,9 @@ do
     echo "'$d' already exists, attempting to checkout the default branch and pull"
     cd "$d"
     default_branch="$(gh api "repos/$repo" -q '.default_branch')"
-    git checkout "$default_branch" && git pull
+    git checkout "$default_branch" && git pull "${GIT_PULL_ARGS[@]}"
     cd ..
   else
-    gh repo clone "$repo"
+    gh repo clone "$repo" -- "${GIT_CLONE_ARGS[@]}"
   fi
 done
