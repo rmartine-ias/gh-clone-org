@@ -8,6 +8,12 @@ A github-cli extension script to clone all repositories in an organization, opti
 gh extension install matt-bartel/gh-clone-org
 ```
 
+The script will attempt to use `parallel` if it is available, otherwise it will clone repositories one at a time. To install `parallel` on macOS:
+
+```bash
+brew install parallel
+```
+
 ## Usage
 
 ```txt
@@ -28,6 +34,8 @@ gh clone-org [-t TOPIC] [-s QUERY] [-p PATH] [-y] ORG
     See: https://docs.github.com/en/github/searching-for-information-on-github/searching-on-github/searching-for-repositories
   -n, --dry-run
     Do not actually clone, just show what would be cloned
+  -1, --single-threaded
+    Clone one repository at a time, instead of in parallel.
   -h, --help
     Display this message.
 ```

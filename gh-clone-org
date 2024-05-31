@@ -21,6 +21,8 @@ usage()
   echo "    See: https://docs.github.com/en/github/searching-for-information-on-github/searching-on-github/searching-for-repositories"
   echo "  -n, --dry-run"
   echo "    Do not actually clone, just show what would be cloned"
+  echo "  -1, --single-threaded"
+  echo "    Clone one repository at a time, instead of in parallel."
   echo "  -h, --help"
   echo "    Display this message."
 }
@@ -67,6 +69,8 @@ do
       SEARCH="$1"
       ;;
     -n | --dry-run) DRY_RUN="true"
+      ;;
+    -1 | --single-threaded) SINGLE="true"
       ;;
     -h | --help ) usage
       exit
@@ -151,10 +155,9 @@ fi
 mkdir -p "$CLONE_PATH"
 cd "$CLONE_PATH"
 
-set +e
-for repo in $REPOS
-do
-  d=${repo#*/}
+clone_or_update() {
+  local -r repo="$1"
+  local -r d=${repo#*/}
   if [ -d "$d" ]
   then
     echo "'$d' already exists, attempting to checkout the default branch and pull"
@@ -165,4 +168,16 @@ do
   else
     gh repo clone "$repo" -- "${GIT_CLONE_ARGS[@]}"
   fi
-done
+}
+export -f clone_or_update
+
+set +e
+if command -v parallel &> /dev/null && [ "$SINGLE" != "true" ]
+then
+  echo "$REPOS" | parallel -j 10 --bar clone_or_update
+else
+  for repo in $REPOS
+  do
+    clone_or_update "$repo"
+  done
+fi
